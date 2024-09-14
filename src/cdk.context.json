@@ -1,0 +1,4 @@
+{
+  "use_localstack": true,
+  "aws-cdk:disable-proxy": true
+}

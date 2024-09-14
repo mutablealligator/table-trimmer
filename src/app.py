@@ -1,28 +1,27 @@
 #!/usr/bin/env python3
 import os
-
 import aws_cdk as cdk
-
 from src.src_stack import SrcStack
 
-
 app = cdk.App()
-SrcStack(app, "SrcStack",
-    # If you don't specify 'env', this stack will be environment-agnostic.
-    # Account/Region-dependent features and context lookups will not work,
-    # but a single synthesized template can be deployed anywhere.
 
-    # Uncomment the next line to specialize this stack for the AWS Account
-    # and Region that are implied by the current CLI configuration.
+use_localstack = app.node.try_get_context("use_localstack") == "true"
 
-    # env=cdk.Environment(account=os.getenv('CDK_DEFAULT_ACCOUNT'), region=os.getenv('CDK_DEFAULT_REGION')),
+if use_localstack:
+    os.environ['CDK_DEFAULT_ACCOUNT'] = '123456789012'
+    os.environ['CDK_DEFAULT_REGION'] = 'us-east-1'
+    os.environ['AWS_ACCESS_KEY_ID'] = 'test'
+    os.environ['AWS_SECRET_ACCESS_KEY'] = 'test'
+    os.environ['AWS_ENDPOINT_URL'] = 'http://localhost:4566'  # Add this line
 
-    # Uncomment the next line if you know exactly what Account and Region you
-    # want to deploy the stack to. */
+env = cdk.Environment(
+    account=os.environ.get('CDK_DEFAULT_ACCOUNT', '123456789012'),
+    region=os.environ.get('CDK_DEFAULT_REGION', 'us-east-1')
+)
 
-    env=cdk.Environment(account='123456789012', region='us-west-2'),
+print(f"Environment: {env}")
+print(f"Using LocalStack: {use_localstack}")
 
-    # For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html
-    )
+SrcStack(app, "SrcStack", env=env, use_localstack=use_localstack)
 
 app.synth()
